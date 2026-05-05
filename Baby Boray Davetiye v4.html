@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baby Boray · Gender Reveal Party</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=DM+Serif+Display:ital@0;1&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --y:   #f5c842;
+  --pk:  #f0a0b8;
+  --gn:  #8cc882;
+  --bl:  #88b4d8;
+  --pu:  #c8b0e8;
+  --co:  #f5956a;
+  --mt:  #72c8b2;
+  --cream: #fdf8f2;
+  --bg:    #f4ede0;
+  --dark:  #3a3228;
+}
+
+html { scroll-behavior: smooth; }
+body { background:var(--bg); color:var(--dark); overflow-x:hidden; }
+
+#confetti-canvas {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; z-index:999;
+}
+
+/* ===================== HERO ===================== */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-glow {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 65% 55% at 50% 45%, #fffbee 0%, transparent 65%),
+    radial-gradient(ellipse 35% 28% at 80% 18%, #e8f4fd66 0%, transparent 55%),
+    radial-gradient(ellipse 30% 25% at 15% 82%, #fde8f266 0%, transparent 55%);
+}
+
+/* ===================== EGGS ===================== */
+.egg {
+  position: absolute;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.egg-tl  { top:-5%;   left:-2%;   width:195px; }
+.egg-tc  { top:-5%;   left:50%;   margin-left:-65px; width:130px; }
+.egg-tr  { top:-5%;   right:-2%;  width:185px; }
+.egg-tr2 { top:11%;   right:-4%;  width:148px; }
+.egg-ml  { top:38%;   left:-5%;   width:168px; transform:translateY(-50%); }
+.egg-mr  { top:44%;   right:-5%;  width:152px; transform:translateY(-50%); }
+.egg-bl  { bottom:-7%;left:-2%;   width:192px; }
+.egg-bl2 { bottom:11%;left:-4%;   width:135px; }
+.egg-bc  { bottom:-5%;left:50%;   margin-left:-58px; width:116px; }
+.egg-br  { bottom:-6%;right:-1%;  width:178px; }
+.egg-br2 { bottom:12%;right:-3%;  width:132px; }
+
+/* ===================== CARD ===================== */
+.invite-card {
+  position: relative; z-index:5;
+  text-align: center;
+  padding: 72px 64px 60px;
+  max-width: 560px;
+  width: 88vw;
+}
+
+/* ===================== TYPOGRAPHY ===================== */
+/* Big script headline */
+.headline-script {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  font-size: clamp(42px, 8vw, 72px);
+  line-height: 1.05;
+  display: block;
+  color: var(--dark);
+  opacity:0; transform:translateY(28px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.headline-script .accent { color: var(--y); }
+
+/* Subtitle script (name-style) */
+.name-script {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  font-size: clamp(36px, 6vw, 58px);
+  line-height: 1.1;
+  display: block;
+  color: var(--pk);
+  margin: 8px 0 4px;
+  opacity:0; transform:translateY(24px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+
+/* Joke / tagline script */
+.joke-script {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 600;
+  font-size: clamp(20px, 3.5vw, 30px);
+  line-height: 1.3;
+  display: block;
+  color: var(--pu);
+  font-style: italic;
+  margin: 6px 0;
+  opacity:0; transform:translateY(18px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+
+/* Small caps details */
+.detail-caps {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  font-size: clamp(11px, 1.8vw, 13px);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: #7a6a58;
+  display: block;
+  line-height: 1.9;
+  opacity:0; transform:translateY(14px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.detail-caps.bold {
+  font-weight: 600;
+  color: var(--dark);
+  letter-spacing: 0.18em;
+}
+.detail-caps a {
+  color: var(--mt);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Dividers */
+.div-thin {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, #d8c8a8, transparent);
+  margin: 14px 0;
+  opacity:0; transform:scaleX(0);
+  transform-origin: center;
+  transition: opacity .5s ease, transform .55s ease;
+}
+.div-dots {
+  display:flex; align-items:center; justify-content:center;
+  gap:8px; margin:12px 0;
+  opacity:0; transform:translateY(10px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.div-dots span {
+  width:5px; height:5px; border-radius:50%;
+  display:inline-block;
+}
+
+/* Visible state */
+.visible {
+  opacity:1 !important;
+  transform: translateY(0) scaleX(1) !important;
+}
+
+/* ===================== SCROLL HINT ===================== */
+.scroll-hint {
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  opacity:0; animation: fadeUp 1s ease 5.5s forwards; z-index:6; pointer-events:none;
+}
+.scroll-hint span {
+  font-family:'Josefin Sans',sans-serif;
+  font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:#b8a890;
+}
+.scroll-arrow {
+  width:20px; height:20px;
+  border-right:1.5px solid #c8b090; border-bottom:1.5px solid #c8b090;
+  transform:rotate(45deg);
+  animation: bounce 1.4s ease-in-out infinite;
+}
+@keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0);} 50%{transform:rotate(45deg) translateY(5px);} }
+@keyframes fadeUp { from{opacity:0;transform:translateX(-50%) translateY(8px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+
+/* ===================== GLITTER ===================== */
+.glitter { position:absolute; border-radius:50%; pointer-events:none; animation:glitter ease-in-out infinite; }
+@keyframes glitter { 0%,100%{opacity:0;transform:scale(.4);} 50%{opacity:1;transform:scale(1.3);} }
+
+/* ===================== COUNTDOWN ===================== */
+.countdown-section {
+  background: var(--dark); padding:58px 20px 65px;
+  text-align:center; position:relative; overflow:hidden;
+}
+.countdown-section::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 55% 50% at 50% 50%, #4a3e30 0%, transparent 70%);
+}
+.cd-eye {
+  font-family:'Josefin Sans',sans-serif;
+  font-size:11px; letter-spacing:.30em; text-transform:uppercase;
+  color:var(--y); opacity:.65; display:block; margin-bottom:10px; position:relative;
+}
+.cd-head {
+  font-family:'Dancing Script',cursive;
+  font-size:34px; font-weight:700; color:var(--cream);
+  display:block; margin-bottom:30px; position:relative;
+}
+.cd-grid { display:flex; justify-content:center; gap:16px; position:relative; flex-wrap:wrap; }
+.cd-unit { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.cd-num {
+  font-family:'Dancing Script',cursive;
+  font-size:clamp(44px,8vw,62px); font-weight:700; color:var(--y);
+  line-height:1; min-width:72px; text-align:center; display:block;
+}
+.cd-lbl { font-family:'Josefin Sans',sans-serif; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:#c8b090; }
+.cd-sep { font-family:'Dancing Script',cursive; font-size:50px; color:var(--y); opacity:.35; line-height:1; align-self:flex-start; padding-top:4px; }
+
+/* ===================== DETAIL CARDS ===================== */
+.cards-section { background:var(--bg); padding:72px 20px 72px; }
+.cards-inner {
+  max-width:680px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; text-align:center;
+}
+.d-card {
+  background:var(--cream); border-radius:18px; padding:28px 16px;
+  box-shadow:0 2px 14px rgba(180,150,100,.08);
+  opacity:0; transform:translateY(22px);
+  transition:opacity .6s ease, transform .6s ease, box-shadow .3s;
+}
+.d-card.visible{opacity:1;transform:translateY(0);}
+.d-card:hover{box-shadow:0 8px 28px rgba(180,150,100,.14);transform:translateY(-3px);}
+.d-card-icon{font-size:32px;display:block;margin-bottom:10px;}
+.d-card-lbl{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#b8a890;display:block;margin-bottom:5px;}
+.d-card-val{font-family:'Dancing Script',cursive;font-size:21px;font-weight:700;display:block;line-height:1.2;}
+.d-card-sub{font-family:'Josefin Sans',sans-serif;font-size:11px;color:#a09080;margin-top:4px;display:block;letter-spacing:.06em;}
+
+/* ===================== MAP ===================== */
+.map-section{background:var(--cream);padding:72px 0 0;position:relative;overflow:hidden;}
+.map-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--y),var(--pk),var(--gn),var(--bl),var(--pu),var(--co),var(--mt),var(--y));
+}
+.map-head{text-align:center;padding:0 20px 32px;opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;}
+.map-head.visible{opacity:1;transform:translateY(0);}
+.map-eye{font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mt);margin-bottom:8px;display:block;}
+.map-tit{font-family:'Dancing Script',cursive;font-size:40px;font-weight:700;color:var(--y);display:block;}
+.map-sub{font-family:'Josefin Sans',sans-serif;font-size:13px;color:#a09080;margin-top:5px;display:block;letter-spacing:.08em;}
+.map-box{position:relative;width:100%;height:450px;overflow:hidden;}
+.map-box iframe{width:100%;height:100%;border:none;filter:saturate(.85) brightness(1.04);transition:filter .3s;}
+.map-box:hover iframe{filter:saturate(1) brightness(1.07);}
+.map-badge{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  background:white;border-radius:40px;padding:9px 22px;
+  box-shadow:0 4px 22px rgba(0,0,0,.12);
+  display:flex;align-items:center;gap:10px;
+  font-family:'Josefin Sans',sans-serif;pointer-events:none;white-space:nowrap;
+}
+.mb-icon{font-size:18px;}
+.mb-text{font-size:13px;letter-spacing:.10em;text-transform:uppercase;color:var(--dark);}
+.mb-sub{font-size:11px;color:#a09080;}
+
+/* ===================== RSVP ===================== */
+.rsvp-section{background:var(--bg);padding:72px 20px 96px;text-align:center;}
+.rsvp-eye{font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mt);display:block;margin-bottom:10px;}
+.rsvp-tit{font-family:'Dancing Script',cursive;font-size:42px;font-weight:700;color:var(--y);display:block;margin-bottom:5px;}
+.rsvp-sub{font-family:'Josefin Sans',sans-serif;font-size:13px;color:#a09080;letter-spacing:.06em;margin-bottom:30px;display:block;}
+.rsvp-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.rsvp-btn{
+  font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+  padding:13px 32px;border-radius:40px;border:none;cursor:pointer;
+  transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+}
+.rsvp-btn.p{background:var(--y);color:var(--dark);box-shadow:0 4px 18px rgba(245,200,66,.32);}
+.rsvp-btn.p:hover{background:#f0c030;box-shadow:0 8px 28px rgba(245,200,66,.48);transform:translateY(-2px);}
+.rsvp-btn.s{background:transparent;color:var(--pk);border:1.5px solid var(--pk);}
+.rsvp-btn.s:hover{background:#fde8f2;transform:translateY(-2px);}
+
+/* ===================== PETALS ===================== */
+.petal{position:fixed;pointer-events:none;z-index:100;animation:petalFall linear infinite;opacity:0;}
+@keyframes petalFall{
+  0%{transform:translateY(-40px) rotate(0deg) scale(1);opacity:0;}
+  10%{opacity:.65;}90%{opacity:.35;}
+  100%{transform:translateY(110vh) rotate(680deg) scale(.5);opacity:0;}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="hero">
+  <div class="hero-glow"></div>
+
+  <!-- Glitter dots -->
+  <div class="glitter" style="width:7px;height:7px;background:var(--y);top:20%;left:20%;animation-duration:2.1s;animation-delay:.4s;"></div>
+  <div class="glitter" style="width:5px;height:5px;background:var(--pk);top:34%;right:22%;animation-duration:1.7s;animation-delay:1s;"></div>
+  <div class="glitter" style="width:6px;height:6px;background:var(--bl);top:64%;left:13%;animation-duration:2.4s;animation-delay:.2s;"></div>
+  <div class="glitter" style="width:5px;height:5px;background:var(--gn);top:70%;right:15%;animation-duration:1.9s;animation-delay:.7s;"></div>
+  <div class="glitter" style="width:6px;height:6px;background:var(--pu);top:47%;left:8%;animation-duration:2.2s;animation-delay:1.3s;"></div>
+  <div class="glitter" style="width:4px;height:4px;background:var(--mt);top:26%;right:9%;animation-duration:1.6s;animation-delay:.5s;"></div>
+
+  <!-- ======== EGGS ======== -->
+
+  <!-- TL: Yellow — kokoshnik + sunburst -->
+  <svg class="egg egg-tl" data-speed="0.16" viewBox="0 0 195 234" fill="none">
+    <ellipse cx="97" cy="122" rx="86" ry="106" fill="#f5e070" opacity=".93"/>
+    <ellipse cx="97" cy="122" rx="86" ry="106" fill="none" stroke="#e0c030" stroke-width="2" opacity=".28"/>
+    <!-- sunburst top -->
+    <circle cx="97" cy="50" r="20" fill="none" stroke="#c8a020" stroke-width="1.8" opacity=".4"/>
+    <circle cx="97" cy="50" r="11" fill="#f5c842" opacity=".45"/>
+    <circle cx="97" cy="50" r="4"  fill="#c8a020" opacity=".65"/>
+    <g stroke="#c8a020" stroke-width="1.2" opacity=".35">
+      <line x1="97" y1="24" x2="97" y2="14"/><line x1="97" y1="76" x2="97" y2="86"/>
+      <line x1="71" y1="50" x2="61" y2="50"/><line x1="123" y1="50" x2="133" y2="50"/>
+      <line x1="79" y1="32" x2="72" y2="25"/><line x1="115" y1="32" x2="122" y2="25"/>
+      <line x1="79" y1="68" x2="72" y2="75"/><line x1="115" y1="68" x2="122" y2="75"/>
+    </g>
+    <!-- kokoshnik arches band -->
+    <path d="M18 98 Q30 76 42 98 Q54 76 66 98 Q78 76 90 98 Q102 76 114 98 Q126 76 138 98 Q150 76 162 98 Q174 76 186 98" stroke="#c8a020" stroke-width="2.2" fill="none" opacity=".42"/>
+    <path d="M18 118 Q30 96 42 118 Q54 96 66 118 Q78 96 90 118 Q102 96 114 118 Q126 96 138 118 Q150 96 162 118 Q174 96 186 118" stroke="#c8a020" stroke-width="1.5" fill="none" opacity=".3"/>
+    <!-- diamond row -->
+    <g fill="#c8a020" opacity=".48">
+      <rect x="42" y="132" width="9" height="9" transform="rotate(45 46 136)"/>
+      <rect x="68" y="132" width="9" height="9" transform="rotate(45 72 136)"/>
+      <rect x="94" y="132" width="9" height="9" transform="rotate(45 98 136)"/>
+      <rect x="120" y="132" width="9" height="9" transform="rotate(45 124 136)"/>
+      <rect x="146" y="132" width="9" height="9" transform="rotate(45 150 136)"/>
+    </g>
+    <!-- daisy row bottom -->
+    <g opacity=".82">
+      <circle cx="52"  cy="180" r="8" fill="white"/><circle cx="52"  cy="180" r="3.5" fill="#f5c842"/>
+      <circle cx="80"  cy="188" r="7" fill="white"/><circle cx="80"  cy="188" r="3"   fill="#f5c842"/>
+      <circle cx="108" cy="186" r="8" fill="white"/><circle cx="108" cy="186" r="3.5" fill="#f5c842"/>
+      <circle cx="138" cy="180" r="7" fill="white"/><circle cx="138" cy="180" r="3"   fill="#f5c842"/>
+    </g>
+    <ellipse cx="38"  cy="200" rx="9" ry="4" fill="#8cc882" transform="rotate(-36 38 200)"  opacity=".7"/>
+    <ellipse cx="156" cy="196" rx="9" ry="4" fill="#8cc882" transform="rotate(28 156 196)" opacity=".7"/>
+  </svg>
+
+  <!-- TC: Pink — onion dome + cross -->
+  <svg class="egg egg-tc" data-speed="0.09" viewBox="0 0 130 156" fill="none">
+    <ellipse cx="65" cy="82" rx="57" ry="70" fill="#f5b8c8" opacity=".91"/>
+    <line x1="65" y1="16" x2="65" y2="42" stroke="#e090a8" stroke-width="2.5" opacity=".5"/>
+    <line x1="52" y1="24" x2="78" y2="24" stroke="#e090a8" stroke-width="2" opacity=".5"/>
+    <line x1="55" y1="31" x2="75" y2="31" stroke="#e090a8" stroke-width="1.5" opacity=".4"/>
+    <path d="M16 70 Q65 42 114 70" stroke="#e090a8" stroke-width="2.2" fill="none" opacity=".45"/>
+    <path d="M20 88 Q65 62 110 88" stroke="#e090a8" stroke-width="1.6" fill="none" opacity=".35"/>
+    <g fill="#e090a8" opacity=".38">
+      <ellipse cx="36" cy="110" rx="8" ry="5" transform="rotate(-18 36 110)"/>
+      <ellipse cx="54" cy="115" rx="8" ry="5" transform="rotate(-6  54 115)"/>
+      <ellipse cx="72" cy="116" rx="8" ry="5" transform="rotate(6   72 116)"/>
+      <ellipse cx="90" cy="112" rx="8" ry="5" transform="rotate(18  90 112)"/>
+    </g>
+    <g fill="white" opacity=".6">
+      <circle cx="42" cy="60" r="3.5"/><circle cx="58" cy="52" r="3"/>
+      <circle cx="76" cy="54" r="3.5"/><circle cx="90" cy="62" r="3"/>
+    </g>
+  </svg>
+
+  <!-- TR: Teal — star tile -->
+  <svg class="egg egg-tr" data-speed="0.21" viewBox="0 0 185 222" fill="none">
+    <ellipse cx="92" cy="116" rx="82" ry="100" fill="#90d8b8" opacity=".91"/>
+    <ellipse cx="92" cy="116" rx="82" ry="100" fill="none" stroke="#60c898" stroke-width="1.8" opacity=".28"/>
+    <g stroke="#38a870" stroke-width="1.5" fill="none" opacity=".44">
+      <polygon points="46,62 54,46 62,62 54,78"/>
+      <polygon points="78,62 86,46 94,62 86,78"/>
+      <polygon points="110,62 118,46 126,62 118,78"/>
+      <polygon points="142,62 150,46 158,62 150,78"/>
+      <polygon points="62,94 70,78 78,94 70,110"/>
+      <polygon points="94,94 102,78 110,94 102,110"/>
+      <polygon points="126,94 134,78 142,94 134,110"/>
+      <polygon points="46,126 54,110 62,126 54,142"/>
+      <polygon points="78,126 86,110 94,126 86,142"/>
+      <polygon points="110,126 118,110 126,126 118,142"/>
+      <polygon points="142,126 150,110 158,126 150,142"/>
+    </g>
+    <g stroke="#38a870" stroke-width="0.9" opacity=".26">
+      <line x1="18" y1="78"  x2="166" y2="78"/>
+      <line x1="18" y1="110" x2="166" y2="110"/>
+      <line x1="18" y1="142" x2="166" y2="142"/>
+    </g>
+    <g fill="white" opacity=".68">
+      <circle cx="50"  cy="170" r="5.5"/><circle cx="78"  cy="178" r="5"/>
+      <circle cx="106" cy="177" r="5.5"/><circle cx="134" cy="170" r="5"/>
+    </g>
+  </svg>
+
+  <!-- TR2: Peach — vine/leaf -->
+  <svg class="egg egg-tr2" data-speed="0.27" viewBox="0 0 148 178" fill="none">
+    <ellipse cx="74" cy="92" rx="65" ry="80" fill="#f5b060" opacity=".88"/>
+    <path d="M42 54 C30 74 62 84 74 70 C86 56 104 72 92 92 C80 112 50 104 52 124 C54 142 82 146 92 134" stroke="#c87820" stroke-width="2.2" fill="none" opacity=".42"/>
+    <g fill="#78c860" opacity=".52">
+      <ellipse cx="74" cy="70"  rx="10" ry="5" transform="rotate(-28 74 70)"/>
+      <ellipse cx="50" cy="92"  rx="9"  ry="4" transform="rotate(42 50 92)"/>
+      <ellipse cx="92" cy="112" rx="10" ry="5" transform="rotate(-18 92 112)"/>
+    </g>
+    <circle cx="36"  cy="60"  r="6" fill="white" opacity=".68"/><circle cx="36"  cy="60"  r="2.5" fill="#f5b060"/>
+    <circle cx="108" cy="78"  r="5" fill="white" opacity=".68"/><circle cx="108" cy="78"  r="2.2" fill="#f5b060"/>
+    <circle cx="54"  cy="124" r="6" fill="white" opacity=".68"/><circle cx="54"  cy="124" r="2.5" fill="#f5b060"/>
+    <circle cx="96"  cy="136" r="5" fill="white" opacity=".68"/><circle cx="96"  cy="136" r="2.2" fill="#f5b060"/>
+  </svg>
+
+  <!-- ML: Blue — Byzantine cross tile -->
+  <svg class="egg egg-ml" data-speed="0.13" viewBox="0 0 168 202" fill="none">
+    <ellipse cx="84" cy="104" rx="75" ry="92" fill="#98b8e8" opacity=".91"/>
+    <g stroke="#5076c0" stroke-width="2" opacity=".42">
+      <line x1="46" y1="58" x2="46" y2="84"/><line x1="33" y1="71" x2="59" y2="71"/>
+      <line x1="41" y1="62" x2="51" y2="62"/><line x1="41" y1="80" x2="51" y2="80"/>
+      <line x1="84" y1="58" x2="84" y2="84"/><line x1="71" y1="71" x2="97" y2="71"/>
+      <line x1="79" y1="62" x2="89" y2="62"/><line x1="79" y1="80" x2="89" y2="80"/>
+      <line x1="122" y1="58" x2="122" y2="84"/><line x1="109" y1="71" x2="135" y2="71"/>
+      <line x1="117" y1="62" x2="127" y2="62"/><line x1="117" y1="80" x2="127" y2="80"/>
+      <line x1="46"  y1="108" x2="46"  y2="134"/><line x1="33"  y1="121" x2="59"  y2="121"/>
+      <line x1="84"  y1="108" x2="84"  y2="134"/><line x1="71"  y1="121" x2="97"  y2="121"/>
+      <line x1="122" y1="108" x2="122" y2="134"/><line x1="109" y1="121" x2="135" y2="121"/>
+    </g>
+    <g fill="#5076c0" opacity=".28">
+      <rect x="61" y="84"  width="7" height="7" transform="rotate(45 64 87)"/>
+      <rect x="99" y="84"  width="7" height="7" transform="rotate(45 102 87)"/>
+      <rect x="61" y="122" width="7" height="7" transform="rotate(45 64 125)"/>
+      <rect x="99" y="122" width="7" height="7" transform="rotate(45 102 125)"/>
+    </g>
+    <g opacity=".78">
+      <circle cx="52"  cy="164" r="6.5" fill="white"/><circle cx="52"  cy="164" r="2.8" fill="#c8a8e8"/>
+      <circle cx="84"  cy="170" r="7"   fill="white"/><circle cx="84"  cy="170" r="3"   fill="#c8a8e8"/>
+      <circle cx="116" cy="164" r="6.5" fill="white"/><circle cx="116" cy="164" r="2.8" fill="#c8a8e8"/>
+    </g>
+  </svg>
+
+  <!-- MR: Lavender — Palekh peacock eye -->
+  <svg class="egg egg-mr" data-speed="0.19" viewBox="0 0 152 182" fill="none">
+    <ellipse cx="76" cy="95" rx="67" ry="82" fill="#c8b0e8" opacity=".88"/>
+    <path d="M76 28 C54 50 38 84 56 106 C74 128 96 116 96 94 C96 72 76 52 76 28Z" fill="#a882d8" opacity=".28"/>
+    <path d="M76 28 C98 50 114 84 96 106 C78 128 56 116 56 94 C56 72 76 52 76 28Z" fill="#a882d8" opacity=".18"/>
+    <circle cx="76" cy="92" r="20" fill="none" stroke="#8055c0" stroke-width="2"   opacity=".38"/>
+    <circle cx="76" cy="92" r="12" fill="none" stroke="#8055c0" stroke-width="1.5" opacity=".3"/>
+    <circle cx="76" cy="92" r="6"  fill="#c8b0e8" opacity=".55"/>
+    <circle cx="76" cy="92" r="2.5" fill="#8055c0" opacity=".8"/>
+    <g stroke="#8055c0" stroke-width="1" opacity=".28">
+      <line x1="76" y1="70"  x2="76" y2="56"/>  <line x1="76" y1="114" x2="76" y2="128"/>
+      <line x1="56" y1="92"  x2="42" y2="92"/>  <line x1="96" y1="92"  x2="110" y2="92"/>
+      <line x1="62" y1="78"  x2="52" y2="68"/>  <line x1="90" y1="78"  x2="100" y2="68"/>
+      <line x1="62" y1="106" x2="52" y2="116"/> <line x1="90" y1="106" x2="100" y2="116"/>
+    </g>
+    <g fill="white" opacity=".55">
+      <circle cx="28"  cy="80"  r="3.5"/><circle cx="24"  cy="100" r="3"/>
+      <circle cx="124" cy="84"  r="3.5"/><circle cx="128" cy="106" r="3"/>
+      <circle cx="50"  cy="154" r="3.5"/><circle cx="76"  cy="162" r="4"/><circle cx="102" cy="154" r="3.5"/>
+    </g>
+  </svg>
+
+  <!-- BL: Blue — daisy + kokoshnik -->
+  <svg class="egg egg-bl" data-speed="0.15" viewBox="0 0 192 230" fill="none">
+    <ellipse cx="96" cy="120" rx="85" ry="104" fill="#a8c0e8" opacity=".92"/>
+    <path d="M18 86 Q48 60 78 86 Q96 60 114 86 Q144 60 174 86" stroke="#7090c8" stroke-width="2.5" fill="none" opacity=".42"/>
+    <path d="M18 110 Q48 84 78 110 Q96 84 114 110 Q144 84 174 110" stroke="#7090c8" stroke-width="1.8" fill="none" opacity=".32"/>
+    <g opacity=".86">
+      <circle cx="46"  cy="54"  r="11" fill="white"/><circle cx="46"  cy="54"  r="5"   fill="#f5e842"/>
+      <circle cx="80"  cy="146" r="9"  fill="white"/><circle cx="80"  cy="146" r="4"   fill="#f5e842"/>
+      <circle cx="118" cy="58"  r="11" fill="white"/><circle cx="118" cy="58"  r="5"   fill="#f5e842"/>
+      <circle cx="150" cy="140" r="9"  fill="white"/><circle cx="150" cy="140" r="4"   fill="#f5e842"/>
+      <circle cx="68"  cy="178" r="9"  fill="white"/><circle cx="68"  cy="178" r="4"   fill="#f5e842"/>
+      <circle cx="122" cy="180" r="9"  fill="white"/><circle cx="122" cy="180" r="4"   fill="#f5e842"/>
+    </g>
+    <ellipse cx="34"  cy="66"  rx="10" ry="5" fill="#78c860" transform="rotate(-40 34 66)"   opacity=".72"/>
+    <ellipse cx="66"  cy="194" rx="10" ry="5" fill="#78c860" transform="rotate(14 66 194)"   opacity=".72"/>
+    <ellipse cx="132" cy="74"  rx="9"  ry="4" fill="#78c860" transform="rotate(52 132 74)"   opacity=".72"/>
+    <ellipse cx="162" cy="154" rx="9"  ry="4" fill="#78c860" transform="rotate(-24 162 154)" opacity=".72"/>
+  </svg>
+
+  <!-- BL2: Green — khohloma berries -->
+  <svg class="egg egg-bl2" data-speed="0.24" viewBox="0 0 135 162" fill="none">
+    <ellipse cx="67" cy="84" rx="58" ry="72" fill="#90d8a0" opacity=".91"/>
+    <path d="M32 60 C18 82 42 106 67 100 C92 94 110 72 96 50 C82 28 46 38 32 60Z" fill="none" stroke="#208840" stroke-width="2" opacity=".38"/>
+    <circle cx="67" cy="68" r="9"  fill="#f5956a" opacity=".68"/>
+    <circle cx="52" cy="78" r="7"  fill="#f5c842" opacity=".68"/>
+    <circle cx="82" cy="80" r="7"  fill="#f5c842" opacity=".68"/>
+    <circle cx="60" cy="58" r="5.5" fill="#f5956a" opacity=".58"/>
+    <circle cx="74" cy="56" r="5.5" fill="#f5b8c8" opacity=".58"/>
+    <ellipse cx="36"  cy="100" rx="11" ry="5" fill="#208840" transform="rotate(-28 36 100)"  opacity=".48"/>
+    <ellipse cx="96"  cy="102" rx="11" ry="5" fill="#208840" transform="rotate(24 96 102)"   opacity=".48"/>
+    <ellipse cx="67"  cy="118" rx="11" ry="5" fill="#208840" transform="rotate(4 67 118)"    opacity=".48"/>
+    <g fill="white" opacity=".55">
+      <circle cx="20" cy="72" r="3.5"/><circle cx="18" cy="94" r="3"/>
+      <circle cx="112" cy="76" r="3.5"/><circle cx="114" cy="98" r="3"/>
+    </g>
+  </svg>
+
+  <!-- BC: Soft pink -->
+  <svg class="egg egg-bc" data-speed="0.11" viewBox="0 0 116 140" fill="none">
+    <ellipse cx="58" cy="74" rx="51" ry="63" fill="#f8a8b8" opacity=".88"/>
+    <g fill="#f080a0" opacity=".32">
+      <ellipse cx="58" cy="26"  rx="8" ry="5.5"/>
+      <ellipse cx="58" cy="26"  rx="8" ry="5.5" transform="rotate(60  58 74)"/>
+      <ellipse cx="58" cy="26"  rx="8" ry="5.5" transform="rotate(120 58 74)"/>
+      <ellipse cx="58" cy="26"  rx="8" ry="5.5" transform="rotate(180 58 74)"/>
+      <ellipse cx="58" cy="26"  rx="8" ry="5.5" transform="rotate(240 58 74)"/>
+      <ellipse cx="58" cy="26"  rx="8" ry="5.5" transform="rotate(300 58 74)"/>
+    </g>
+    <circle cx="58" cy="74" r="14" fill="none" stroke="#f080a0" stroke-width="1.5" opacity=".32"/>
+    <circle cx="58" cy="74" r="5"  fill="white" opacity=".55"/>
+  </svg>
+
+  <!-- BR: Yellow — sunflower rosette -->
+  <svg class="egg egg-br" data-speed="0.18" viewBox="0 0 178 213" fill="none">
+    <ellipse cx="89" cy="111" rx="79" ry="96" fill="#f5e070" opacity=".93"/>
+    <g fill="none" stroke="#c8a020" stroke-width="1.8" opacity=".42">
+      <circle cx="89" cy="80" r="30"/><circle cx="89" cy="80" r="18"/><circle cx="89" cy="80" r="7"/>
+    </g>
+    <circle cx="89" cy="80" r="3.5" fill="#c8a020" opacity=".65"/>
+    <g fill="#f5c842" opacity=".46">
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(0   89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(30  89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(60  89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(90  89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(120 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(150 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(180 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(210 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(240 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(270 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(300 89 80)"/>
+      <ellipse cx="89" cy="44"  rx="7" ry="13" transform="rotate(330 89 80)"/>
+    </g>
+    <g opacity=".84">
+      <circle cx="46"  cy="164" r="9"  fill="white"/><circle cx="46"  cy="164" r="4"   fill="#f5c842"/>
+      <circle cx="76"  cy="174" r="8"  fill="white"/><circle cx="76"  cy="174" r="3.5" fill="#f5c842"/>
+      <circle cx="106" cy="173" r="8"  fill="white"/><circle cx="106" cy="173" r="3.5" fill="#f5c842"/>
+      <circle cx="136" cy="164" r="9"  fill="white"/><circle cx="136" cy="164" r="4"   fill="#f5c842"/>
+    </g>
+    <ellipse cx="54"  cy="183" rx="10" ry="5" fill="#8cc882" transform="rotate(14 54 183)"   opacity=".68"/>
+    <ellipse cx="122" cy="181" rx="10" ry="5" fill="#8cc882" transform="rotate(-18 122 181)" opacity=".68"/>
+  </svg>
+
+  <!-- BR2: Coral — Zhostovo floral -->
+  <svg class="egg egg-br2" data-speed="0.25" viewBox="0 0 132 158" fill="none">
+    <ellipse cx="66" cy="82" rx="58" ry="72" fill="#f5956a" opacity=".82"/>
+    <circle cx="66" cy="78" r="26" fill="#f06040" opacity=".28"/>
+    <g fill="white" opacity=".52">
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(0   66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(45  66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(90  66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(135 66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(180 66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(225 66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(270 66 78)"/>
+      <ellipse cx="66" cy="48"  rx="7" ry="13" transform="rotate(315 66 78)"/>
+    </g>
+    <circle cx="66" cy="78" r="9"  fill="#f5e070" opacity=".78"/>
+    <circle cx="66" cy="78" r="3"  fill="#c84020" opacity=".68"/>
+    <ellipse cx="28"  cy="98"  rx="10" ry="4.5" fill="#50a040" transform="rotate(-38 28 98)"  opacity=".52"/>
+    <ellipse cx="104" cy="100" rx="10" ry="4.5" fill="#50a040" transform="rotate(36 104 100)" opacity=".52"/>
+    <ellipse cx="50"  cy="134" rx="9"  ry="4"   fill="#50a040" transform="rotate(-14 50 134)" opacity=".52"/>
+    <ellipse cx="82"  cy="136" rx="9"  ry="4"   fill="#50a040" transform="rotate(19 82 136)"  opacity=".52"/>
+  </svg>
+
+  <!-- ======== INVITE CARD ======== -->
+  <div class="invite-card">
+
+    <!-- Big headline script -->
+    <span class="headline-script" id="el-h1"><span style="color:#F5E070;">bir yumurta</span></span>
+    <span class="headline-script" id="el-h2" style="transition-delay:.08s"><span style="color:#F5E070;">çatlamak </span><span class="accent"><span style="color:#F5E070;">üzere!</span></span></span>
+
+    <div class="div-thin" id="el-d1" style="margin:18px 0 14px;"></div>
+
+    <!-- Subtext caps -->
+    <span class="detail-caps" id="el-sub1">BİZE KATILIN</span>
+    <span class="detail-caps" id="el-sub2" style="transition-delay:.08s">BABY BORAY'IN CİNSİYETİNİ İLK ÖĞRENEN OLUN</span>
+
+    <div class="div-dots" id="el-dots1">
+      <span style="background:var(--y);"></span>
+      <span style="background:var(--pk);"></span>
+      <span style="background:var(--gn);"></span>
+    </div>
+
+    <!-- Name script -->
+    <span class="name-script" id="el-name"><span style="color:#F5E070;">Baby Boray</span></span>
+
+    <!-- Joke lines -->
+    <span class="joke-script" id="el-joke1">
+</span>
+    <span class="joke-script" id="el-joke2" style="transition-delay:.1s; color:var(--gn);">
+</span>
+
+    <div class="div-thin" id="el-d2" style="margin:16px 0 14px;"></div>
+
+    <!-- Date / Time / Location caps -->
+    <span class="detail-caps bold" id="el-date">Pazar | 17 Mayıs 2026 | Saat 11.00</span>
+    <span class="detail-caps" id="el-loc" style="transition-delay:.08s">
+      <a href="#map">Botanik Park · Bursa</a>
+    </span>
+
+    <div class="div-dots" id="el-dots2" style="margin-top:16px;">
+      <span style="background:var(--pu);"></span>
+      <span style="background:var(--co);"></span>
+      <span style="background:var(--mt);"></span>
+    </div>
+
+    <!-- Footer joke -->
+    <span class="joke-script" id="el-foot" style="color:var(--y); font-size:clamp(16px,2.8vw,22px);">sürpriz için hazır olun ✨</span>
+
+  </div>
+
+  <div class="scroll-hint">
+    <span>aşağı kaydır</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ===================== COUNTDOWN ===================== -->
+<section class="countdown-section">
+  <span class="cd-eye">partiye kalan süre</span>
+  <span class="cd-head">Yumurta Çatlıyor! 🥚</span>
+  <div class="cd-grid">
+    <div class="cd-unit"><span class="cd-num" id="cd-d">--</span><span class="cd-lbl">Gün</span></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit"><span class="cd-num" id="cd-h">--</span><span class="cd-lbl">Saat</span></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit"><span class="cd-num" id="cd-m">--</span><span class="cd-lbl">Dakika</span></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit"><span class="cd-num" id="cd-s">--</span><span class="cd-lbl">Saniye</span></div>
+  </div>
+</section>
+
+<!-- ===================== DETAIL CARDS ===================== -->
+<section class="cards-section">
+  <div class="cards-inner">
+    <div class="d-card" id="dc1">
+      <span class="d-card-icon">📅</span>
+      <span class="d-card-lbl">Tarih</span>
+      <span class="d-card-val" style="color:var(--y);">17 Mayıs 2026</span>
+      <span class="d-card-sub">Pazar</span>
+    </div>
+    <div class="d-card" id="dc2" style="transition-delay:.15s">
+      <span class="d-card-icon">🕚</span>
+      <span class="d-card-lbl">Saat</span>
+      <span class="d-card-val" style="color:var(--pk);">11:00</span>
+      <span class="d-card-sub"></span>
+    </div>
+    <div class="d-card" id="dc3" style="transition-delay:.30s">
+      <span class="d-card-icon">🌿</span>
+      <span class="d-card-lbl">Konum</span>
+      <span class="d-card-val" style="color:var(--gn);font-size:18px;">Botanik Park</span>
+      <span class="d-card-sub">Bursa</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MAP ===================== -->
+<section class="map-section" id="map">
+  <div class="map-head" id="map-header">
+    <span class="map-eye">buluşma noktası</span>
+    <span class="map-tit">Botanik Park, Bursa</span>
+    <span class="map-sub">Nilüfer, Bursa · Açık hava etkinlik alanı</span>
+  </div>
+  <div class="map-box">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3042.0!2d28.9784!3d40.2135!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ca150a3b4c0f4b%3A0x1e3e7e6c5f3a8c2a!2sBotanik%20Park%20Bursa!5e0!3m2!1str!2str!4v1699000000000!5m2!1str!2str"
+      allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Botanik Park Bursa">
+    </iframe>
+    <div class="map-badge">
+      <span class="mb-icon">📍</span>
+      <div>
+        <div class="mb-text">Botanik Park · Bursa</div>
+        <div class="mb-sub">17 Mayıs 2026 · Pazar · Saat 11:00</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RSVP ===================== -->
+<section class="rsvp-section">
+  <span class="rsvp-eye">katılım onayı</span>
+  <span class="rsvp-tit">Gelecek misin? 🎉</span>
+  <span class="rsvp-sub">Hangi renk çıkacağını birlikte öğrenelim!</span>
+  <div class="rsvp-btns">
+    <a class="rsvp-btn p" href="https://chat.whatsapp.com/IiyyeuqGkan4mbET8NejET" target="_blank">✅ Evet, Geliyorum!</a>
+    <a class="rsvp-btn s" href="https://chat.whatsapp.com/IiyyeuqGkan4mbET8NejET" target="_blank">💬 WhatsApp Grubuna Katıl</a>
+  </div>
+</section>
+
+<script>
+// ---- COUNTDOWN ----
+const evDate = new Date('2026-05-17T11:00:00');
+function tick() {
+  const d = evDate - new Date();
+  if (d <= 0) { ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent='00'); return; }
+  document.getElementById('cd-d').textContent = String(Math.floor(d/86400000)).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(Math.floor((d%86400000)/3600000)).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(Math.floor((d%3600000)/60000)).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(Math.floor((d%60000)/1000)).padStart(2,'0');
+}
+setInterval(tick,1000); tick();
+
+// ---- EGG ENTRANCE ----
+const eggData = [
+  { sel:'.egg-tl',  tx:-170, ty:-140, rot:-24 },
+  { sel:'.egg-tc',  tx:0,    ty:-150, rot:0   },
+  { sel:'.egg-tr',  tx:160,  ty:-130, rot:26  },
+  { sel:'.egg-tr2', tx:170,  ty:-55,  rot:34  },
+  { sel:'.egg-ml',  tx:-170, ty:0,    rot:-20 },
+  { sel:'.egg-mr',  tx:170,  ty:0,    rot:20  },
+  { sel:'.egg-bl',  tx:-160, ty:150,  rot:-24 },
+  { sel:'.egg-bl2', tx:-170, ty:75,   rot:-38 },
+  { sel:'.egg-bc',  tx:0,    ty:160,  rot:0   },
+  { sel:'.egg-br',  tx:160,  ty:150,  rot:24  },
+  { sel:'.egg-br2', tx:170,  ty:75,   rot:38  },
+];
+
+// Save natural transforms
+const nat = {};
+eggData.forEach(({ sel }) => {
+  const el = document.querySelector(sel);
+  if (!el) return;
+  nat[sel] = el.style.transform || '';
+  el.style.transform = nat[sel] + ` translate(${eggData.find(e=>e.sel===sel).tx}px,${eggData.find(e=>e.sel===sel).ty}px) rotate(${eggData.find(e=>e.sel===sel).rot}deg)`;
+  el.style.transition = 'none';
+});
+
+eggData.forEach(({ sel }, i) => {
+  setTimeout(() => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.style.transition = 'opacity 1s cubic-bezier(.22,1,.36,1), transform 1.2s cubic-bezier(.22,1,.36,1)';
+    el.style.opacity = '1';
+    el.style.transform = nat[sel];
+  }, 150 + i * 90);
+});
+
+// ---- TEXT SEQUENCE ----
+[
+  { id:'el-h1',    d:1400 },
+  { id:'el-h2',    d:1750 },
+  { id:'el-d1',    d:2100 },
+  { id:'el-sub1',  d:2350 },
+  { id:'el-sub2',  d:2550 },
+  { id:'el-dots1', d:2800 },
+  { id:'el-name',  d:3050 },
+  { id:'el-joke1', d:3350 },
+  { id:'el-joke2', d:3600 },
+  { id:'el-d2',    d:3850 },
+  { id:'el-date',  d:4100 },
+  { id:'el-loc',   d:4300 },
+  { id:'el-dots2', d:4500 },
+  { id:'el-foot',  d:4800 },
+].forEach(({ id, d }) => setTimeout(() => {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('visible');
+}, d));
+
+// ---- PARALLAX ----
+function onScroll() {
+  const sy = window.scrollY;
+  eggData.forEach(({ sel }) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    const spd = parseFloat(el.dataset.speed || '0.15');
+    el.style.transform = (nat[sel] || '') + ` translateY(${sy * spd}px)`;
+  });
+}
+window.addEventListener('scroll', onScroll, { passive:true });
+
+// ---- CONFETTI ----
+const cvs = document.getElementById('confetti-canvas');
+const ctx = cvs.getContext('2d');
+let pcs = [];
+function resz() { cvs.width=innerWidth; cvs.height=innerHeight; }
+resz(); window.addEventListener('resize',resz);
+const cc = ['#f5c842','#f0a0b8','#8cc882','#88b4d8','#c8b0e8','#f5956a','#72c8b2'];
+function spawn(n) {
+  for(let i=0;i<n;i++) pcs.push({
+    x:Math.random()*cvs.width, y:-10,
+    w:5+Math.random()*9, h:3+Math.random()*4,
+    color:cc[Math.floor(Math.random()*cc.length)],
+    vx:(Math.random()-.5)*3, vy:1.5+Math.random()*3,
+    angle:Math.random()*Math.PI*2, va:(Math.random()-.5)*.14,
+  });
+}
+function drawC() {
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  pcs = pcs.filter(p=>p.y<cvs.height+20);
+  pcs.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.04; p.angle+=p.va;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle);
+    ctx.fillStyle=p.color; ctx.globalAlpha=Math.min(1,(cvs.height-p.y)/200);
+    ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+  });
+  if(pcs.length>0) requestAnimationFrame(drawC);
+}
+setTimeout(()=>{ spawn(220); drawC(); }, 5200);
+document.querySelector('.rsvp-btn.p')?.addEventListener('click',()=>{ spawn(150); drawC(); });
+
+// ---- PETALS ----
+const pc=['#f5e07066','#f5b8c866','#88b4d866','#8cc88266','#c8b0e866'];
+function mkP() {
+  const p=document.createElement('div'); p.className='petal';
+  const s=7+Math.random()*14;
+  p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}vw;border-radius:${Math.random()>.5?'50%':'40% 60% 60% 40%/40% 40% 60% 60%'};background:${pc[Math.floor(Math.random()*pc.length)]};animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*8}s;`;
+  document.body.appendChild(p); setTimeout(()=>p.remove(),18000);
+}
+for(let i=0;i<18;i++) mkP();
+setInterval(mkP,2200);
+
+// ---- SCROLL OBSERVER ----
+const obs = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); }),{threshold:.2});
+['map-header','dc1','dc2','dc3'].forEach(id=>{ const el=document.getElementById(id); if(el) obs.observe(el); });
+</script>
+</body>
+</html>
